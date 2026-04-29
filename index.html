@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Mes Objectifs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: 'Nunito', 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #f093fb 50%, #f5576c 100%);
+      background-attachment: fixed;
+      overflow-x: hidden;
+    }
+    #app { max-width: 480px; margin: 0 auto; padding-bottom: 40px; }
+
+    /* HEADER */
+    .header { padding: 48px 24px 28px; text-align: center; }
+    .header-date { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.8); letter-spacing: 2px; text-transform: uppercase; }
+    .header-title { font-size: 32px; font-weight: 900; color: #fff; margin-top: 4px; text-shadow: 0 2px 10px rgba(0,0,0,0.15); }
+    .progress-wrap { margin-top: 20px; display: flex; justify-content: center; }
+    .progress-wrap svg { transform: rotate(-90deg); }
+    .progress-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .progress-pct { font-size: 26px; font-weight: 900; color: #fff; }
+    .progress-count { font-size: 11px; color: rgba(255,255,255,0.85); font-weight: 600; }
+
+    /* CARD */
+    .card {
+      background: #F8F9FF;
+      border-radius: 32px 32px 0 0;
+      min-height: calc(100vh - 260px);
+      padding: 28px 20px 20px;
+      box-shadow: 0 -4px 30px rgba(0,0,0,0.08);
+    }
+
+    /* GOAL ITEMS */
+    .goals-list { display: flex; flex-direction: column; gap: 12px; }
+    .goal-item {
+      border-radius: 22px;
+      padding: 16px 18px;
+      display: flex; align-items: center; gap: 14;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      border: 2px solid transparent;
+      transition: all 0.35s cubic-bezier(.34,1.56,.64,1);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      gap: 14px;
+    }
+    .goal-item.done { box-shadow: none; }
+    .goal-emoji { font-size: 30px; min-width: 36px; text-align: center; }
+    .goal-label { flex: 1; font-size: 16px; font-weight: 700; transition: all .3s; }
+    .goal-label.done { text-decoration: line-through; opacity: 0.9; color: #fff !important; }
+    .goal-actions { display: flex; align-items: center; gap: 6px; }
+    .btn-icon {
+      background: rgba(0,0,0,0.07); border: none; border-radius: 10px;
+      width: 30px; height: 30px; cursor: pointer; font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .checkbox {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 2.5px solid;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .3s; font-size: 14px; font-weight: 900; color: #fff;
+      flex-shrink: 0;
+    }
+
+    /* BUTTONS */
+    .btn-add-goal {
+      margin-top: 20px; width: 100%; padding: 16px; border-radius: 20px;
+      border: 2.5px dashed #C5C8E8; background: transparent;
+      color: #667eea; font-size: 16px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      font-family: inherit; transition: all .2s;
+    }
+    .btn-add-goal:hover { background: #f0f2ff; }
+    .btn-reset {
+      margin-top: 10px; width: 100%; padding: 12px; border-radius: 16px;
+      border: none; background: #FEE2E2;
+      color: #EF4444; font-size: 14px; font-weight: 700; cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-primary {
+      width: 100%; padding: 16px; border-radius: 20px; border: none;
+      background: linear-gradient(135deg,#667eea,#f093fb);
+      color: #fff; font-size: 17px; font-weight: 800; cursor: pointer;
+      box-shadow: 0 8px 20px rgba(102,126,234,0.35);
+      font-family: inherit; transition: all .2s;
+    }
+    .btn-primary:disabled { background: #ddd; box-shadow: none; cursor: default; }
+    .btn-back {
+      background: #eee; border: none; border-radius: 12px; width: 40px; height: 40px;
+      font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-family: inherit;
+    }
+
+    /* FORM */
+    .form-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .form-title { font-size: 20px; font-weight: 800; color: #1a1a2e; }
+    .form-label { font-size: 13px; font-weight: 700; color: #888; letter-spacing: 1px; display: block; margin-bottom: 8px; }
+    .emoji-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    .emoji-btn {
+      width: 42px; height: 42px; border-radius: 12px; border: 2px solid transparent;
+      font-size: 20px; cursor: pointer; background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: all .15s;
+    }
+    .emoji-btn.selected { border-color: #667eea; background: #EEF0FF; }
+    .text-input {
+      width: 100%; margin-bottom: 20px; padding: 14px 16px;
+      border-radius: 16px; border: 2px solid #E8E8F0; font-size: 16px; font-weight: 600;
+      font-family: inherit; outline: none; color: #1a1a2e; background: #fff;
+    }
+    .text-input:focus { border-color: #667eea; }
+    .color-grid { display: flex; gap: 10px; margin-bottom: 28px; }
+    .color-btn {
+      width: 34px; height: 34px; border-radius: 50%; border: none; cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: box-shadow .2s;
+    }
+    .preview-box {
+      border-radius: 20px; padding: 16px 20px;
+      display: flex; align-items: center; gap: 14; margin-bottom: 28px;
+      gap: 14px;
+    }
+    .preview-emoji { font-size: 28px; }
+    .preview-label { font-size: 16px; font-weight: 700; color: #1a1a2e; }
+
+    /* CELEBRATE */
+    .overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center;
+      animation: fadeIn .3s ease;
+    }
+    .celebrate-box {
+      background: #fff; border-radius: 32px; padding: 40px 32px; text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 320px; width: 90%;
+      animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+    }
+    .celebrate-emoji { font-size: 64px; }
+    .celebrate-title { font-size: 26px; font-weight: 900; color: #1a1a2e; margin-top: 12px; }
+    .celebrate-sub { font-size: 16px; color: #666; margin-top: 8px; }
+
+    /* EMPTY */
+    .empty { text-align: center; padding: 40px 20px; }
+    .empty-emoji { font-size: 48px; }
+    .empty-title { font-size: 18px; font-weight: 700; margin-top: 12px; color: #888; }
+    .empty-sub { font-size: 14px; color: #aaa; margin-top: 6px; }
+
+    /* SHIMMER */
+    .shimmer {
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg,transparent,rgba(255,255,255,0.35),transparent);
+      animation: shimmer .5s ease; pointer-events: none;
+    }
+
+    @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+    @keyframes popIn { from { transform:scale(.7); opacity:0 } to { transform:scale(1); opacity:1 } }
+    @keyframes slideUp { from { transform:translateY(20px); opacity:0 } to { transform:translateY(0); opacity:1 } }
+    @keyframes shimmer { from { transform:translateX(-100%) } to { transform:translateX(100%) } }
+    .view-form { animation: slideUp .3s ease; }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const DEFAULT_GOALS = [
+  { id: 1, emoji: "💧", label: "Boire 2L d'eau",        color: "#3B9EFF", bg: "#EBF5FF" },
+  { id: 2, emoji: "😴", label: "Dormir 8 heures",        color: "#8B5CF6", bg: "#F3EEFF" },
+  { id: 3, emoji: "💪", label: "50 pompes",              color: "#F97316", bg: "#FFF4EC" },
+  { id: 4, emoji: "🏃", label: "30 min de marche",       color: "#10B981", bg: "#EDFAF4" },
+  { id: 5, emoji: "📖", label: "Lire 20 pages",          color: "#F59E0B", bg: "#FFFBEB" },
+  { id: 6, emoji: "🧘", label: "10 min de méditation",   color: "#EC4899", bg: "#FDF2F8" },
+];
+
+const COLORS = [
+  { color: "#3B9EFF", bg: "#EBF5FF" }, { color: "#8B5CF6", bg: "#F3EEFF" },
+  { color: "#F97316", bg: "#FFF4EC" }, { color: "#10B981", bg: "#EDFAF4" },
+  { color: "#F59E0B", bg: "#FFFBEB" }, { color: "#EC4899", bg: "#FDF2F8" },
+  { color: "#EF4444", bg: "#FEF2F2" }, { color: "#06B6D4", bg: "#ECFEFF" },
+];
+
+const EMOJIS = ["💧","😴","💪","🏃","📖","🧘","🎯","🥗","🚴","🏋️","☀️","🎨","🎵","✍️","🧠","❤️","🍎","🌿"];
+
+function todayKey() { return new Date().toISOString().split("T")[0]; }
+
+function getDayName() {
+  const d = new Date();
+  return d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+}
+
+// ---- STATE ----
+let state = {
+  goals: JSON.parse(localStorage.getItem("ht_goals") || "null") || DEFAULT_GOALS,
+  checked: JSON.parse(localStorage.getItem("ht_checked_" + todayKey()) || "{}"),
+  view: "home", // home | add | edit
+  editId: null,
+  form: { label: "", emoji: "🎯", color: COLORS[0] },
+  celebrate: false,
+  justChecked: null,
+};
+
+function save() {
+  localStorage.setItem("ht_goals", JSON.stringify(state.goals));
+  localStorage.setItem("ht_checked_" + todayKey(), JSON.stringify(state.checked));
+}
+
+function render() {
+  save();
+  const app = document.getElementById("app");
+  const { goals, checked, view, form, celebrate, justChecked } = state;
+  const completed = goals.filter(g => checked[g.id]).length;
+  const progress = goals.length ? Math.round((completed / goals.length) * 100) : 0;
+  const circ = 2 * Math.PI * 46;
+
+  let html = `
+  ${celebrate ? `
+  <div class="overlay" onclick="closeCelebrate()">
+    <div class="celebrate-box" onclick="event.stopPropagation()">
+      <div class="celebrate-emoji">🎉</div>
+      <div class="celebrate-title">Bravo !</div>
+      <div class="celebrate-sub">Tu as complété tous tes objectifs aujourd'hui !</div>
+      <button class="btn-primary" style="margin-top:24px;width:auto;padding:12px 32px;" onclick="closeCelebrate()">Super ! 🙌</button>
+    </div>
+  </div>` : ""}
+
+  <div id="app-inner">
+    <div class="header">
+      <div class="header-date">${getDayName()}</div>
+      <div class="header-title">Mes Objectifs</div>
+      <div class="progress-wrap">
+        <div style="position:relative;width:110px;height:110px;">
+          <svg width="110" height="110">
+            <circle cx="55" cy="55" r="46" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="9"/>
+            <circle cx="55" cy="55" r="46" fill="none" stroke="#fff" stroke-width="9"
+              stroke-dasharray="${circ}"
+              stroke-dashoffset="${circ * (1 - progress / 100)}"
+              stroke-linecap="round"
+              style="transition:stroke-dashoffset 0.6s ease;transform:rotate(-90deg);transform-origin:55px 55px"/>
+          </svg>
+          <div class="progress-inner">
+            <span class="progress-pct">${progress}%</span>
+            <span class="progress-count">${completed}/${goals.length}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+  `;
+
+  if (view === "add" || view === "edit") {
+    html += `
+    <div class="view-form">
+      <div class="form-header">
+        <button class="btn-back" onclick="goHome()">←</button>
+        <span class="form-title">${view === "edit" ? "Modifier l'objectif" : "Nouvel objectif"}</span>
+      </div>
+
+      <span class="form-label">EMOJI</span>
+      <div class="emoji-grid">
+        ${EMOJIS.map(e => `<button class="emoji-btn ${form.emoji===e?"selected":""}" onclick="pickEmoji('${e}')">${e}</button>`).join("")}
+      </div>
+
+      <span class="form-label">DESCRIPTION</span>
+      <input class="text-input" id="goal-input" type="text" placeholder="Ex: Boire 2L d'eau..." value="${escHtml(form.label)}" oninput="updateLabel(this.value)" />
+
+      <span class="form-label">COULEUR</span>
+      <div class="color-grid">
+        ${COLORS.map((c,i) => `<button class="color-btn" style="background:${c.color};${form.color.color===c.color?`box-shadow:0 0 0 3px #fff,0 0 0 5px ${c.color};`:""}" onclick="pickColor(${i})"></button>`).join("")}
+      </div>
+
+      <div class="preview-box" style="background:${form.color.bg};border:2px solid ${form.color.color}33;">
+        <span class="preview-emoji">${form.emoji}</span>
+        <span class="preview-label">${escHtml(form.label) || "Aperçu de ton objectif"}</span>
+      </div>
+
+      <button class="btn-primary" ${!form.label.trim()?"disabled":""} onclick="submitGoal()">
+        ${view === "edit" ? "✅ Sauvegarder" : "➕ Ajouter l'objectif"}
+      </button>
+    </div>`;
+  } else {
+    // HOME
+    if (goals.length === 0) {
+      html += `<div class="empty">
+        <div class="empty-emoji">🌟</div>
+        <div class="empty-title">Aucun objectif pour l'instant</div>
+        <div class="empty-sub">Ajoute ton premier objectif ci-dessous !</div>
+      </div>`;
+    }
+
+    html += `<div class="goals-list">`;
+    goals.forEach(g => {
+      const done = !!checked[g.id];
+      const shimmer = justChecked === g.id;
+      html += `
+      <div class="goal-item ${done?"done":""}"
+        style="background:${done?g.color:"#fff"};border-color:${done?"transparent":g.color+"33"};${done?`box-shadow:0 8px 24px ${g.color}44`:""}"
+        onclick="toggleGoal(${g.id})">
+        ${shimmer?`<div class="shimmer"></div>`:""}
+        <span class="goal-emoji">${g.emoji}</span>
+        <span class="goal-label ${done?"done":""}" style="color:${done?"#fff":"#1a1a2e"}">${escHtml(g.label)}</span>
+        <div class="goal-actions">
+          <button class="btn-icon" style="color:${done?"rgba(255,255,255,0.8)":"#888"}" onclick="event.stopPropagation();editGoal(${g.id})">✏️</button>
+          <button class="btn-icon" style="color:${done?"rgba(255,255,255,0.8)":"#888"}" onclick="event.stopPropagation();deleteGoal(${g.id})">🗑️</button>
+          <div class="checkbox" style="background:${done?"rgba(255,255,255,0.35)":g.bg};border-color:${done?"rgba(255,255,255,0.7)":g.color}">
+            ${done?`<span>✓</span>`:""}
+          </div>
+        </div>
+      </div>`;
+    });
+    html += `</div>
+
+    <button class="btn-add-goal" onclick="goAdd()"><span style="font-size:20px">＋</span> Ajouter un objectif</button>
+    ${completed > 0 ? `<button class="btn-reset" onclick="resetDay()">🔄 Réinitialiser la journée</button>` : ""}
+    `;
+  }
+
+  html += `</div></div>`;
+  app.innerHTML = html;
+
+  // Focus input if in form
+  if (view === "add" || view === "edit") {
+    const inp = document.getElementById("goal-input");
+    if (inp) setTimeout(() => inp.focus(), 100);
+  }
+}
+
+function escHtml(s) {
+  return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// Actions
+window.toggleGoal = function(id) {
+  state.checked[id] = !state.checked[id];
+  state.justChecked = state.checked[id] ? id : null;
+  if (state.justChecked) setTimeout(() => { state.justChecked = null; render(); }, 600);
+  const all = state.goals.length > 0 && state.goals.every(g => state.checked[g.id]);
+  if (all) setTimeout(() => { state.celebrate = true; render(); }, 400);
+  render();
+};
+window.goHome = function() { state.view = "home"; state.editId = null; state.form = { label:"", emoji:"🎯", color:COLORS[0] }; render(); };
+window.goAdd  = function() { state.view = "add"; state.form = { label:"", emoji:"🎯", color:COLORS[0] }; render(); };
+window.editGoal = function(id) {
+  const g = state.goals.find(x => x.id===id);
+  state.view = "edit"; state.editId = id;
+  state.form = { label: g.label, emoji: g.emoji, color: COLORS.find(c=>c.color===g.color)||COLORS[0] };
+  render();
+};
+window.deleteGoal = function(id) {
+  if (!confirm("Supprimer cet objectif ?")) return;
+  state.goals = state.goals.filter(g => g.id !== id);
+  delete state.checked[id];
+  render();
+};
+window.pickEmoji  = function(e) { state.form.emoji = e; render(); };
+window.pickColor  = function(i) { state.form.color = COLORS[i]; render(); };
+window.updateLabel = function(v) { state.form.label = v; };
+window.submitGoal = function() {
+  const label = state.form.label.trim();
+  if (!label) return;
+  if (state.view === "edit" && state.editId) {
+    state.goals = state.goals.map(g => g.id === state.editId
+      ? { ...g, label, emoji: state.form.emoji, color: state.form.color.color, bg: state.form.color.bg }
+      : g);
+  } else {
+    state.goals.push({ id: Date.now(), label, emoji: state.form.emoji, color: state.form.color.color, bg: state.form.color.bg });
+  }
+  state.view = "home"; state.editId = null; state.form = { label:"", emoji:"🎯", color:COLORS[0] };
+  render();
+};
+window.resetDay = function() {
+  if (!confirm("Réinitialiser tous les objectifs du jour ?")) return;
+  state.checked = {};
+  render();
+};
+window.closeCelebrate = function() { state.celebrate = false; render(); };
+
+render();
+</script>
+</body>
+</html>
